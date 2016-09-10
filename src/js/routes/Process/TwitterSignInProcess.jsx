@@ -31,7 +31,7 @@ export default class TwitterSignInProcess extends Component {
   }
 
   componentDidMount () {
-    this.listener = VoterStore.addListener(this._onVoterStoreChange.bind(this));
+    this.voterStoreListener = VoterStore.addListener(this._onVoterStoreChange.bind(this));
 
     var {voter} = this.state;
     var return_url;
@@ -75,11 +75,11 @@ export default class TwitterSignInProcess extends Component {
   }
 
   componentWillUnmount () {
-    this.listener.remove();
+    this.voterStoreListener.remove();
   }
 
   _onVoterStoreChange () {
-    this.setState({ voter: VoterStore.voter() });
+    this.setState({ voter: VoterStore.getVoter() });
   }
 
   twitterSignInStart (return_url) {
@@ -119,7 +119,7 @@ export default class TwitterSignInProcess extends Component {
           Please wait...
         </div>;
     } else {
-      return <div className="container-fluid well u-gutter-top--small fluff-full1">
+      return <div className="container-fluid well u-gutter__top--small fluff-full1">
               <h3>Page Not Found</h3>
                 <div className="small">We were not able to find that page. Please try again!</div>
             </div>;

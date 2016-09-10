@@ -5,7 +5,6 @@ import CandidateItem from "../../components/Ballot/CandidateItem";
 import CandidateStore from "../../stores/CandidateStore";
 import FollowToggle from "../../components/Widgets/FollowToggle";
 import LoadingWheel from "../../components/LoadingWheel";
-import OfficeStore from "../../stores/OfficeStore";
 import OrganizationCard from "../../components/VoterGuide/OrganizationCard";
 import OrganizationStore from "../../stores/OrganizationStore";
 import TwitterAccountCard from "../../components/Twitter/TwitterAccountCard";
@@ -21,7 +20,7 @@ export default class VerifyThisIsMe extends Component {
 
   constructor (props) {
     super(props);
-    this.state = {candidate: {}, office: {} };
+    this.state = {candidate: {} };
   }
 
   componentDidMount () {
@@ -35,14 +34,12 @@ export default class VerifyThisIsMe extends Component {
     this.voterStoreListener = VoterStore.addListener(this._onVoterStoreChange.bind(this));
 
     this.candidateStoreListener = CandidateStore.addListener(this._onCandidateStoreChange.bind(this));
-    this.officeStoreListener = OfficeStore.addListener(this._onCandidateStoreChange.bind(this));
 
     this.twitterStoreListener = TwitterStore.addListener(this._onTwitterStoreChange.bind(this));
   }
 
   componentWillUnmount (){
     this.candidateStoreListener.remove();
-    this.officeStoreListener.remove();
     this.organizationStoreListener.remove();
     this.voterStoreListener.remove();
     this.twitterStoreListener.remove();
@@ -50,7 +47,7 @@ export default class VerifyThisIsMe extends Component {
 
   _onVoterStoreChange () {
     console.log("Entering _onVoterStoreChange");
-    this.setState({ voter: VoterStore.voter() });
+    this.setState({ voter: VoterStore.getVoter() });
   }
 
   _onOrganizationStoreChange (){
@@ -67,10 +64,6 @@ export default class VerifyThisIsMe extends Component {
     this.setState({
       candidate: candidate,
     });
-
-    if (candidate.contest_office_we_vote_id){
-      this.setState({ office: OfficeStore.get(candidate.contest_office_we_vote_id) || {} });
-    }
   }
 
   _onTwitterStoreChange () {
@@ -95,7 +88,7 @@ export default class VerifyThisIsMe extends Component {
 
   render () {
     // Manage the control over this organization voter guide
-    var {candidate, office, organization, voter} = this.state;
+    var {candidate, organization, voter} = this.state;
     var signed_in_twitter = voter === undefined ? false : voter.signed_in_twitter;
     var signed_in_with_this_twitter_account = false;
     if (signed_in_twitter) {
@@ -117,7 +110,7 @@ export default class VerifyThisIsMe extends Component {
       this.props.params.we_vote_id = this.state.owner_we_vote_id;
       return <span>
         <section className="candidate-card__container">
-          <CandidateItem {...candidate} office_name={office.ballot_item_display_name}/>
+          <CandidateItem {...candidate} />
         </section>
         <div>
           <br />
@@ -180,7 +173,7 @@ export default class VerifyThisIsMe extends Component {
         }
       </div>;
     } else {
-      return <div className="container-fluid well u-gutter-top--small fluff-full1">
+      return <div className="container-fluid well u-gutter__top--small fluff-full1">
               <h3>Could Not Confirm</h3>
                 <div className="small">We were not able to find an account for this
                   Twitter Handle{ this.props.params.twitter_handle ?

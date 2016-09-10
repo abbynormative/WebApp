@@ -18,16 +18,16 @@ export default class SignIn extends Component {
   componentDidMount () {
     this._onVoterStoreChange();
     this.facebookListener = FacebookStore.addListener(this._onFacebookChange.bind(this));
-    this.listener = VoterStore.addListener(this._onVoterStoreChange.bind(this));
+    this.voterStoreListener = VoterStore.addListener(this._onVoterStoreChange.bind(this));
   }
 
   componentWillUnmount () {
-    this.listener.remove();
+    this.voterStoreListener.remove();
     this.facebookListener.remove();
   }
 
   _onVoterStoreChange () {
-    this.setState({ voter: VoterStore.voter() });
+    this.setState({ voter: VoterStore.getVoter() });
   }
 
   _onFacebookChange () {
@@ -65,7 +65,7 @@ export default class SignIn extends Component {
     }
 
     return <div className="">
-      <div className="container-fluid well u-gutter-top--small fluff-full1">
+      <div className="container-fluid well u-gutter__top--small fluff-full1">
         <h3 className="text-center">{voter.signed_in_personal ? <span>My Account</span> : <span>Sign In</span>}</h3>
         <div className="text-center">
           {voter.signed_in_facebook ?

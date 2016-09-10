@@ -1,11 +1,9 @@
 import React, {Component, PropTypes } from "react";
-import { Link, browserHistory } from "react-router";
-import ReactCSSTransitionGroup from "react-addons-css-transition-group";
-import FollowingDropdown from "../../components/Navigation/followingDropdown";
+import { Link } from "react-router";
+import FollowingDropdown from "../../components/Navigation/FollowingDropdown";
 import GuideStore from "../../stores/GuideStore";
 import GuideActions from "../../actions/GuideActions";
 import VoterGuideItem from "../../components/VoterGuide/VoterGuideItem";
-import LoadingWheel from "../../components/LoadingWheel";
 
 /* VISUAL DESIGN HERE: https://invis.io/8F53FDX9G */
 
@@ -21,21 +19,19 @@ export default class OpinionsFollowed extends Component {
   }
 
   componentDidMount () {
-    this.listener = GuideStore.addListener(this._onChange.bind(this));
+    this.guideStoreListener = GuideStore.addListener(this._onGuideStoreChange.bind(this));
     GuideActions.retrieveGuidesFollowed();
   }
 
   componentWillUnmount (){
-    this.listener.remove();
+    this.guideStoreListener.remove();
   }
 
-  _onChange (){
+  _onGuideStoreChange (){
     var list = GuideStore.followedList();
 
     if (list !== undefined && list.length > 0){
       this.setState({ voter_guide_followed_list: GuideStore.followedList() });
-    } else {
-      browserHistory.push("/opinions");
     }
   }
 
@@ -56,23 +52,21 @@ export default class OpinionsFollowed extends Component {
 
   render () {
     return <div>
-  <div className="container-fluid opinions-followed__container">
-    <div className="text-center"><FollowingDropdown following_type={this.getFollowingType()} /></div>
-      <p>
-        Organizations, public figures and other voters you currently follow. See also
-        <Link to="/friends">your friends</Link>. We will never sell your email.
-      </p>
-    <div className="voter-guide-list">
-    <ReactCSSTransitionGroup transitionName="org-ignore" transitionEnterTimeout={400} transitionLeaveTimeout={200}>
-      {
-        this.state.voter_guide_followed_list ?
-        this.state.voter_guide_followed_list.map( item =>
-          <VoterGuideItem key={item.we_vote_id} {...item} />
-        ) : LoadingWheel
-      }
-      </ReactCSSTransitionGroup>
-    </div>
-  </div>
-</div>;
+      <div className="container-fluid opinions-followed__container">
+        <div className="text-center"><FollowingDropdown following_type={this.getFollowingType()} /></div>
+          <p>
+            Organizations, public figures and other voters you currently follow. See
+            also <Link to="/friends">your friends</Link>. We will never sell your email.
+          </p>
+        <div className="voter-guide-list">
+          {
+            this.state.voter_guide_followed_list && this.state.voter_guide_followed_list.length ?
+            this.state.voter_guide_followed_list.map( item =>
+              <VoterGuideItem key={item.we_vote_id} {...item} />
+            ) : null
+          }
+        </div>
+      </div>
+    </div>;
   }
 }

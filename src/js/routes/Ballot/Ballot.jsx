@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from "react";
 import { Button } from "react-bootstrap";
 import { browserHistory, Link } from "react-router";
 import BallotItem from "../../components/Ballot/BallotItem";
+import BallotItemCompressed from "../../components/Ballot/BallotItemCompressed";
 import BallotStore from "../../stores/BallotStore";
 import BallotTitleDropdown from "../../components/Navigation/BallotTitleDropdown";
 import LoadingWheel from "../../components/LoadingWheel";
@@ -30,10 +31,10 @@ export default class Ballot extends Component {
     }
     // We need a ballotStoreListener here because we want the ballot to display before positions are received
     this.ballotStoreListener = BallotStore.addListener(this._onChange.bind(this));
-    // NOTE: retrieveAll and retrieveAllCounts are also called in SupportStore when voterAddressRetrieve is received,
+    // NOTE: voterAllPositionsRetrieve and positionsCountForAllBallotItems are also called in SupportStore when voterAddressRetrieve is received,
     // so we get duplicate calls when you come straight to the Ballot page. There is no easy way around this currently.
-    SupportActions.retrieveAll();
-    SupportActions.retrieveAllCounts();
+    SupportActions.voterAllPositionsRetrieve();
+    SupportActions.positionsCountForAllBallotItems();
     this.supportStoreListener = SupportStore.addListener(this._onChange.bind(this));
   }
 
@@ -122,8 +123,8 @@ export default class Ballot extends Component {
 
   render () {
     const ballot = this.state.ballot;
+    var voter_address = VoterStore.getAddress();
     if (!ballot) {
-      var voter_address = VoterStore.getAddress();
       if (voter_address.length === 0) {
         return <div className="ballot">
           <div className="text-center">
@@ -140,7 +141,9 @@ export default class Ballot extends Component {
       }
     }
     const missing_address = this.props.location === null;
-    const ballot_caveat = BallotStore.ballot_properties.ballot_caveat;
+    // const ballot_caveat = BallotStore.ballot_properties.ballot_caveat;
+    const election_name = BallotStore.currentBallotElectionName;
+    const election_date = BallotStore.currentBallotElectionDate;
 
     const emptyBallotButton = this.getFilterType() !== "none" && !missing_address ?
         <span>
@@ -155,23 +158,34 @@ export default class Ballot extends Component {
         </span>;
 
     const emptyBallot = ballot.length === 0 ?
-      <div className="container-fluid well u-gutter-top--small fluff-full1">
+      <div className="container-fluid well u-gutter__top--small fluff-full1">
         <h3 className="text-center">{this.emptyMsg()}</h3>
         {emptyBallotButton}
       </div> :
       <div></div>;
 
+    let show_expanded_ballot_items = false;
+
     return <div className="ballot">
+      <h1 className="text-center">{election_name}</h1>
+      <div className="text-center">
+        { election_date ?
+          <span>Ballot for {election_date}, </span> :
+          null }
+        {voter_address}
+        <span> (<Link to="/settings/location">edit</Link>)</span>
+      </div>
       <div className="text-center"><BallotTitleDropdown ballot_type={this.getBallotType()} /></div>
-      { ballot_caveat !== "" ?
+      {/* TO BE DISCUSSED ballot_caveat !== "" ?
         <div className="alert alert alert-info alert-dismissible" role="alert">
           <button type="button" className="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           {ballot_caveat}
         </div> : null
-      }
+      */}
       {emptyBallot}
-      {
-        ballot.map( (item) => <BallotItem key={item.we_vote_id} {...item} />)
+      { show_expanded_ballot_items ?
+        ballot.map( (item) => <BallotItem key={item.we_vote_id} {...item} />) :
+        ballot.map( (item) => <BallotItemCompressed key={item.we_vote_id} {...item} />)
       }
       </div>;
   }

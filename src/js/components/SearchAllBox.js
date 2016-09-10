@@ -13,7 +13,7 @@ export default class SearchAllBox extends Component {
   constructor (props){
     super(props);
     this.state = {
-      search_results: ""
+      search_results: []
     };
   }
 
@@ -54,7 +54,7 @@ export default class SearchAllBox extends Component {
   onSearchFieldTextChange (event){
     let text_from_search_field = event.target.value;
     SearchAllActions.searchAll(text_from_search_field);
-    this.setState({search_results: ""});
+    this.setState({search_results: []});
   }
 
   // both of the two methods below need to have constants refactored
@@ -68,40 +68,38 @@ export default class SearchAllBox extends Component {
 
   //handle pressing Enter in search field
   onSearchFormSubmit (event){
-     console.log("onSearchFormSubmit");
-     var search_results = this.state.search_results;
-     console.log(search_results[0]);
-     var first_result = search_results[0];
-     if (search_results === undefined) {
-       first_result = search_results[0]
-     }
-     if (first_result === undefined || first_result === null) {
-       event.preventDefault();
-       return false;
-     } else {
-       event.preventDefault();
-       var searchLink = makeSearchLink(first_result.twitter_handle, first_result.we_vote_id, first_result.kind_of_owner);
-       browserHistory.push(searchLink);
-       return false;
-     }
+    var search_results = this.state.search_results;
+    var first_result;
+    if (search_results !== undefined) {
+     first_result = search_results[0];
+    }
+    if (first_result === undefined || first_result === null) {
+      event.preventDefault();
+      return false;
+    } else {
+      event.preventDefault();
+      var searchLink = makeSearchLink(first_result.twitter_handle, first_result.we_vote_id, first_result.kind_of_owner);
+      browserHistory.push(searchLink);
+      return false;
+    }
   }
 
   render () {
     var search_results = this.state.search_results;
 
     return <div className="page-header__search">
-        <form onSubmit={this.onSearchFormSubmit.bind(this)} className="navbar-form" role="search">
+        <form onSubmit={this.onSearchFormSubmit.bind(this)} className="" role="search">
         <div className="input-group site-search">
           <input type="text"
-                 className="form-control"
-                 placeholder="Search We Vote"
+                 className="form-control site-search__input-field"
+                 placeholder="Search We Vote…"
                  name="master_search_field"
                  autoComplete="off"
                  onFocus={this.onSearchFocus.bind(this)}
                  onChange={this.onSearchFieldTextChange.bind(this)}
                  value={this.state.text_from_search_field} />
           <div className="input-group-btn">
-            <button className="page-header__search-button btn btn-default" type="submit"><i className="glyphicon glyphicon-search"></i></button>
+            <button className="site-search__button btn btn-default" type="submit"><i className="glyphicon glyphicon-search"></i></button>
           </div>
         </div>
         </form>

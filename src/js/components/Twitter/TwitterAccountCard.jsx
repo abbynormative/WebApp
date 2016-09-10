@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from "react";
-import Image from "../../components/Image";
+import ImageHandler from "../../components/ImageHandler";
 import { abbreviateNumber, numberWithCommas, removeTwitterNameFromDescription } from "../../utils/textFormat";
 
 export default class TwitterAccountCard extends Component {
@@ -29,10 +29,7 @@ export default class TwitterAccountCard extends Component {
     return <div className="card__container">
         <div className="card__main">
           <div className="card__media-object">
-            { twitter_photo_url ?
-              <Image imageUrl={twitter_photo_url} class="card__media-object-anchor" /> :
-              <i className="icon-org-lg icon-icon-org-placeholder-6-2 icon-org-resting-color card__media-object-anchor"></i>
-            }
+            <ImageHandler imageUrl={twitter_photo_url} className="card__media-object-anchor" />
             <div className="card__media-object-content">
               <div className="card__display-name">{displayName}</div>
               { twitterDescriptionMinusName ?

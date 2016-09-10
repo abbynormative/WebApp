@@ -1,7 +1,17 @@
 var Dispatcher = require("../dispatcher/Dispatcher");
 var FluxMapStore = require("flux/lib/FluxMapStore");
+const assign = require("object-assign");
 
 class OfficeStore extends FluxMapStore {
+  getOffice (office_we_vote_id) {
+    // if (!this.isLoaded()){ return undefined; }
+    let office_list = this.getState().offices;
+    if (office_list) {
+      return office_list[office_we_vote_id];
+    } else {
+      return undefined;
+    }
+  }
 
   reduce (state, action) {
 
@@ -12,9 +22,25 @@ class OfficeStore extends FluxMapStore {
     switch (action.type) {
 
       case "officeRetrieve":
-        var key = action.res.we_vote_id;
-        var office = action.res || {};
-        return state.set(key, office);
+        let office = action.res;
+        return {
+          ...state,
+          offices: assign({}, state.offices, office )
+        };
+
+
+      case "voterBallotItemsRetrieve":
+        let offices = {};
+        action.res.ballot_item_list.forEach(one_ballot_item =>{
+          if (one_ballot_item.kind_of_ballot_item === "OFFICE") {
+            offices[one_ballot_item.we_vote_id] = one_ballot_item;
+          }
+        });
+
+        return {
+          ...state,
+          offices: assign({}, state.offices, offices )
+        };
 
       case "error-officeRetrieve":
         console.log(action);

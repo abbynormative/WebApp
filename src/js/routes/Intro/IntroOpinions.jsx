@@ -14,26 +14,26 @@ export default class IntroOpinionsPage extends Component {
 
   constructor (props){
     super(props);
-    this.state = {guideList: [], ballot_has_guides: null};
+    this.state = {guideToFollowList: [], ballot_has_guides: null};
   }
 
   componentDidMount () {
     this._onChange();
-    this.listener = GuideStore.addListener(this._onChange.bind(this));
+    this.guideStoreListener = GuideStore.addListener(this._onChange.bind(this));
   }
 
   _onChange () {
-    this.setState({ guideList: GuideStore.toFollowList(),
+    this.setState({ guideToFollowList: GuideStore.toFollowList(),
                   ballot_has_guides: GuideStore.ballotHasGuides(),
                   address: VoterStore.getAddress() });
   }
 
   componentWillUnmount (){
-    this.listener.remove();
+    this.guideStoreListener.remove();
   }
 
   render () {
-    let { guideList, ballot_has_guides } = this.state;
+    let { guideToFollowList, ballot_has_guides } = this.state;
     console.log(ballot_has_guides);
     var float = {
       right: {
@@ -72,7 +72,7 @@ export default class IntroOpinionsPage extends Component {
                 <br/>
                 {ballot_has_guides ? <span></span> :
                   <p>There are no organizations with opinions on your ballot. Here are some popular organizations.</p>}
-                {guideList ? <GuideList organizations={guideList} /> : <div></div> }
+                {guideToFollowList ? <GuideList organizationsToFollow={guideToFollowList} /> : <div></div> }
             </div>
         </div>
     <Link style={float.left} to="/intro">

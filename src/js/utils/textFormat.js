@@ -36,8 +36,12 @@ export function capitalizeString (raw_string) {
   if (raw_string === undefined) {
     return "";
   }
-  var lowercase = raw_string.toLowerCase();
-  return lowercase.replace( /(^|\s)([a-z])/g, function (m, p1, p2) { return p1 + p2.toUpperCase(); } );
+  if (raw_string === raw_string.toUpperCase()) {
+    var lowercase = raw_string.toLowerCase();
+    return lowercase.replace( /(^|\s)([a-z])/g, function (m, p1, p2) { return p1 + p2.toUpperCase(); } );
+  } else {
+    return raw_string;
+  }
 }
 
 export function extractTwitterHandleFromTextString (raw_string) {
@@ -57,6 +61,7 @@ export function extractTwitterHandleFromTextString (raw_string) {
 }
 /**
  * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
+ * Duplicate values in the second object will overwrite those in the first
  * @param obj1
  * @param obj2
  * @returns obj3 a new object based on obj1 and obj2
@@ -101,4 +106,3 @@ export function removeTwitterNameFromDescription (displayName, twitterDescriptio
     }
     return twitterDescriptionMinusName;
 }
-

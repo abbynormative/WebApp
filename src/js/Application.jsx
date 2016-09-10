@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from "react";
 import NavigatorInFooter from "./components/Navigation/NavigatorInFooter";
-import MoreMenu from "./components/MoreMenu";
-import Header from "./components/Header";
-import SubHeader from "./components/SubHeader";
+import MoreMenu from "./components/Navigation/MoreMenu";
+import HeaderBar from "./components/Navigation/HeaderBar";
 import VoterStore from "./stores/VoterStore";
 import StarActions from "./actions/StarActions";
 import VoterActions from "./actions/VoterActions";
@@ -59,8 +58,8 @@ export default class Application extends Component {
 
   componentDidMount () {
     let voter_device_id = VoterStore.voterDeviceId();
-    VoterActions.retrieveVoter(voter_device_id);
-    StarActions.retrieveAll();
+    VoterActions.voterRetrieve(voter_device_id);
+    StarActions.voterAllStarsStatusRetrieve();
     this.token = VoterStore.addListener(this._onChange.bind(this));
   }
 
@@ -70,7 +69,7 @@ export default class Application extends Component {
 
   _onChange () {
     this.setState({
-      voter: VoterStore.voter(),
+      voter: VoterStore.getVoter(),
       location: VoterStore.getAddress()
     });
   }
@@ -95,22 +94,23 @@ export default class Application extends Component {
 
     return <div className="app-base" id="app-base-id">
       <Headroom>
-        <header className="page-header">
-          <Header pathname={pathname} voter={voter} />
-          <SubHeader ballotItemWeVoteId={ballotItemWeVoteId} />
-        </header>
+        <div className="page-header__container">
+          <HeaderBar pathname={pathname} voter={voter} />
+        </div>
       </Headroom>
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-xs-4 sidebar-menu">
-            { voter.signed_in_personal ? <MoreMenu {...voter} /> : <MoreMenu /> }
-          </div>
-          <div className="col-xs-8-container col-xs-8 container-main">
-            { this.props.children }
+      <div className="page-content-container">
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-xs-4 sidebar-menu">
+              { voter.signed_in_personal ? <MoreMenu {...voter} /> : <MoreMenu /> }
+            </div>
+            <div className="col-xs-8-container col-xs-8 container-main">
+              { this.props.children }
+            </div>
           </div>
         </div>
       </div>
-        <NavigatorInFooter pathname={pathname} />
+      <NavigatorInFooter pathname={pathname} />
     </div>;
   }
 }

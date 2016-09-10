@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router";
 import Candidate from "./Ballot/Candidate";
 import LoadingWheel from "../components/LoadingWheel";
-import GuidePositionList from "./Guide/PositionList";
+import GuidePositionList from "./Guide/GuidePositionList";
 import OrganizationActions from "../actions/OrganizationActions";
 import PositionListForFriends from "./Guide/PositionListForFriends";
 import TwitterActions from "../actions/TwitterActions";
@@ -57,7 +57,7 @@ export default class NotFound extends Component {
   }
 
   _onVoterStoreChange () {
-    this.setState({ voter: VoterStore.voter() });
+    this.setState({ voter: VoterStore.getVoter() });
   }
 
   organizationCreateFromTwitter (new_twitter_handle) {
@@ -102,7 +102,7 @@ export default class NotFound extends Component {
       this.props.params.candidate_we_vote_id = this.state.owner_we_vote_id;
       return <Candidate candidate_we_vote_id {...this.props} />;
     } else if (this.state.kind_of_owner === "ORGANIZATION"){
-      this.props.params.we_vote_id = this.state.owner_we_vote_id;
+      this.props.params.organization_we_vote_id = this.state.owner_we_vote_id;
       if (looking_at_positions_for_friends_only) {
         return <PositionListForFriends we_vote_id {...this.props} />;
       } else {
@@ -111,7 +111,7 @@ export default class NotFound extends Component {
     } else if (this.state.kind_of_owner === "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"){
       return <UnknownTwitterAccount {...this.state} />;
     } else {
-      return <div className="container-fluid well u-gutter-top--small fluff-full1">
+      return <div className="container-fluid well u-gutter__top--small fluff-full1">
               <h3>Claim Your Page</h3>
                 <div className="medium">
                   We were not able to find an account for this

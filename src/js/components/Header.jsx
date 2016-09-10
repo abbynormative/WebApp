@@ -34,7 +34,7 @@ export default class Header extends Component {
 
   render () {
     var { pathname } = this.props;
-    var { signed_in_personal, signed_in_twitter, twitter_screen_name, voter_photo_url } = this.props.voter;
+    var { signed_in_facebook, signed_in_personal, signed_in_twitter, twitter_screen_name, voter_photo_url } = this.props.voter;
     const logOut = FacebookActions.appLogout;
 
     let image_placeholder = "";
@@ -45,91 +45,93 @@ export default class Header extends Component {
         image_placeholder = <span className="position-statement__avatar"><Icon name="avatar-generic" width={34} height={34} /></span>;
     }
 
-    return <section className="separate-bottom u-gutter-top--small container-fluid">
-        {/* The components/MoreMenu code has to be reproduced here for mobile */}
-        <ReactBurgerMenu pageWrapId={ "" } outerContainerId={ "app-base-id" } styles={ menuStyles }>
-          <div className="device-menu--mobile">
-            <ul className="nav nav-stacked">
+    return <header className="page-header">
+      {/* The components/MoreMenu code has to be reproduced here for mobile */}
+      <ReactBurgerMenu pageWrapId={ "" } outerContainerId={ "app" } styles={ menuStyles }>
+        <div className="device-menu--mobile">
+          <ul className="nav nav-stacked">
+            <li>
+              <div><span className="we-vote-promise">We Vote's Promise: We will never sell your email.</span></div>
+            </li>
+          </ul>
+          <h4 className="text-left"></h4>
+          <ul className="nav nav-stacked">
+            { signed_in_twitter && twitter_screen_name ?
               <li>
-                <div><span className="we-vote-promise">We Vote's Promise: We will never sell your email.</span></div>
-              </li>
-            </ul>
-            <h4 className="text-left"></h4>
-            <ul className="nav nav-stacked">
-              { signed_in_twitter && twitter_screen_name ?
-                <li>
-                  <Link onClick={this.hide.bind(this)} to={"/" + twitter_screen_name}>
-                    <div>
-                      { voter_photo_url ?
-                        <img className="position-statement__avatar"
-                              src={voter_photo_url}
-                              width="34px"
-                        /> :
-                        image_placeholder }
-                      <span className="header-slide-out-menu-text-left">Your Page</span>
-                    </div>
-                  </Link>
-                </li> :
-                <li>
-                  <Link onClick={this.hide.bind(this)} to="/settings/claim">
-                    <div>
-                      <span className="header-slide-out-menu-text-left">Claim Your Page</span>
-                    </div>
-                  </Link>
-                </li>
-              }
-              <li>
-                <Link onClick={this.hide.bind(this)} to="/settings/location">
+                <Link onClick={this.hide.bind(this)} to={"/" + twitter_screen_name}>
                   <div>
-                    <span className="header-slide-out-menu-text-left">Your Address &amp; Ballot</span>
+                    { voter_photo_url ?
+                      <img className="position-statement__avatar"
+                            src={voter_photo_url}
+                            width="34px"
+                      /> :
+                      image_placeholder }
+                    <span className="header-slide-out-menu-text-left">Your Page</span>
                   </div>
                 </Link>
-              </li>
-             <li>
-                <Link onClick={this.hide.bind(this)} to="/opinions">
-                  <div>
-                    <span className="header-slide-out-menu-text-left">Who You Can Follow</span>
-                  </div>
-                </Link>
-              </li>
-              { signed_in_personal ?
-                <li>
-                  <Link onClick={this.hide.bind(this)} to="/more/sign_in">
-                    <div onClick={logOut}>
-                      <span className="header-slide-out-menu-text-left">Sign Out</span>
-                    </div>
-                  </Link>
-                </li> :
-                <li>
-                  <Link onClick={this.hide.bind(this)} to="/more/sign_in">
-                    <div>
-                      <span className="header-slide-out-menu-text-left">Sign In</span>
-                    </div>
-                  </Link>
-                </li> }
-            </ul>
-            <h4 className="text-left"></h4>
-            <ul className="nav nav-stacked">
+              </li> :
+              null
+            }
+            { !signed_in_twitter && !signed_in_facebook ?
               <li>
-                <Link onClick={this.hide.bind(this)} to="/more/about">
+                <Link onClick={this.hide.bind(this)} to="/settings/claim">
                   <div>
-                    <span className="header-slide-out-menu-text-left">About <strong>We Vote</strong></span>
+                    <span className="header-slide-out-menu-text-left">Claim Your Page</span>
                   </div>
                 </Link>
-              </li>
-            </ul>
-          </div>
-        </ReactBurgerMenu>
-        <h4 className="pull-left page-logo">
-          <Link to="/ballot">
-            Your Voter Guide
-          </Link>
-          <span className="page-header__version"> demo</span>
-        </h4>
-        <div>
-          <SearchAllBox />
+              </li> :
+              null
+            }
+            <li>
+              <Link onClick={this.hide.bind(this)} to="/settings/location">
+                <div>
+                  <span className="header-slide-out-menu-text-left">Your Address &amp; Ballot</span>
+                </div>
+              </Link>
+            </li>
+           <li>
+              <Link onClick={this.hide.bind(this)} to="/opinions">
+                <div>
+                  <span className="header-slide-out-menu-text-left">Who You Can Follow</span>
+                </div>
+              </Link>
+            </li>
+            { signed_in_personal ?
+              <li>
+                <Link onClick={this.hide.bind(this)} to="/more/sign_in">
+                  <div onClick={logOut}>
+                    <span className="header-slide-out-menu-text-left">Sign Out</span>
+                  </div>
+                </Link>
+              </li> :
+              <li>
+                <Link onClick={this.hide.bind(this)} to="/more/sign_in">
+                  <div>
+                    <span className="header-slide-out-menu-text-left">Sign In</span>
+                  </div>
+                </Link>
+              </li> }
+          </ul>
+          <h4 className="text-left"></h4>
+          <ul className="nav nav-stacked">
+            <li>
+              <Link onClick={this.hide.bind(this)} to="/more/about">
+                <div>
+                  <span className="header-slide-out-menu-text-left">About <strong>We Vote</strong></span>
+                </div>
+              </Link>
+            </li>
+          </ul>
         </div>
+      </ReactBurgerMenu>
+      <div className="page-header__content">
+        <Link to="/ballot" className="page-logo h4">
+          We Vote
+          <span className="page-logo__version"> demo</span>
+        </Link>
+        <SearchAllBox />
         <NavigatorInHeader pathname={pathname} />
-      </section>;
+      </div>
+    </header>;
   }
 }

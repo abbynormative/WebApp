@@ -1,5 +1,5 @@
 import { Button } from "react-bootstrap";
-import FollowingDropdown from "../components/Navigation/followingDropdown";
+import FollowingDropdown from "../components/Navigation/FollowingDropdown";
 import GuideStore from "../stores/GuideStore";
 import SearchGuidesToFollowBox from "../components/SearchGuidesToFollowBox";
 import VoterStore from "../stores/VoterStore";
@@ -17,22 +17,23 @@ export default class Opinions extends Component {
 
   constructor (props){
     super(props);
-    this.state = {guideList: [], ballot_has_guides: null};
+    this.state = {guideToFollowList: [], ballot_has_guides: null};
   }
 
   componentDidMount () {
     this._onChange();
-    this.listener = GuideStore.addListener(this._onChange.bind(this));
+    this.guideStoreListener = GuideStore.addListener(this._onChange.bind(this));
   }
 
   _onChange () {
-    this.setState({ guideList: GuideStore.toFollowList(),
-                  ballot_has_guides: GuideStore.ballotHasGuides(),
-                  address: VoterStore.getAddress() });
+    this.setState({
+      guideToFollowList: GuideStore.toFollowList(),
+      ballot_has_guides: GuideStore.ballotHasGuides(),
+      address: VoterStore.getAddress() });
   }
 
   componentWillUnmount (){
-    this.listener.remove();
+    this.guideStoreListener.remove();
   }
 
   getCurrentRoute (){
@@ -51,7 +52,7 @@ export default class Opinions extends Component {
   }
 
   render () {
-    const { ballot_has_guides, guideList, address } = this.state;
+    const { ballot_has_guides, guideToFollowList, address } = this.state;
     let guides;
     var floatRight = {
         float: "right"
@@ -77,13 +78,13 @@ export default class Opinions extends Component {
             <p></p> :
             <p>There are no organizations with opinions on your ballot. Here are some popular organizations</p>
           }
-        <GuideList organizations={guideList}/>
+        <GuideList organizationsToFollow={guideToFollowList} instantRefreshOn />
         </div>;
       }
 
     const content =
       <div className="opinion-view">
-        <div className="container-fluid well u-gutter-top--small fluff-full1">
+        <div className="container-fluid well u-gutter__top--small fluff-full1">
           <div className="text-center"><FollowingDropdown following_type={this.getFollowingType()} /></div>
           {guides}
         </div>

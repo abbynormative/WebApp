@@ -5,7 +5,6 @@ import FollowToggle from "../../components/Widgets/FollowToggle";
 import ItemActionBar from "../../components/Widgets/ItemActionBar";
 import ItemPositionStatementActionBar from "../../components/Widgets/ItemPositionStatementActionBar";
 import LoadingWheel from "../../components/LoadingWheel";
-import OfficeStore from "../../stores/OfficeStore";
 import OrganizationCard from "../../components/VoterGuide/OrganizationCard";
 import OrganizationPositionItem from "../../components/VoterGuide/OrganizationPositionItem";
 import OrganizationStore from "../../stores/OrganizationStore";
@@ -22,7 +21,7 @@ export default class EditPositionAboutCandidateModal extends Component {
 
   constructor (props) {
     super(props);
-    this.state = {candidate: {}, office: {}};
+    this.state = {candidate: {}};
   }
 
   componentDidMount () {
@@ -32,7 +31,6 @@ export default class EditPositionAboutCandidateModal extends Component {
     this.voterStoreListener = VoterStore.addListener(this._onVoterStoreChange.bind(this));
 
     this.candidateStoreListener = CandidateStore.addListener(this._onCandidateStoreChange.bind(this));
-    this.officeStoreListener = OfficeStore.addListener(this._onCandidateStoreChange.bind(this));
     this.supportStoreListener = SupportStore.addListener(this._onSupportStoreChange.bind(this));
 
     // let { ballot_item_we_vote_id } = this.props.position;
@@ -45,27 +43,28 @@ export default class EditPositionAboutCandidateModal extends Component {
     // }
 
     // this.props.position.ballot_item_we_vote_id is the candidate
-    var ballot_item_we_vote_id = this.props.position.ballot_item_we_vote_id;
+    let ballot_item_we_vote_id = this.props.position.ballot_item_we_vote_id;
     let supportProps = SupportStore.get(ballot_item_we_vote_id);
 
     this.setState({supportProps: supportProps});
 
     // if supportProps is missing support_count or oppose_count, force a retrieve
-    if (supportProps.support_count === undefined || supportProps.oppose_count === undefined) {
-      SupportActions.retrievePositionsCountsForOneBallotItem(ballot_item_we_vote_id);
+    if (supportProps !== undefined) {
+      if (supportProps.support_count === undefined || supportProps.oppose_count === undefined) {
+        SupportActions.retrievePositionsCountsForOneBallotItem(ballot_item_we_vote_id);
+      }
     }
   }
 
   componentWillUnmount () {
     this.candidateStoreListener.remove();
-    this.officeStoreListener.remove();
     this.organizationStoreListener.remove();
     this.voterStoreListener.remove();
     this.supportStoreListener.remove();
   }
 
   _onVoterStoreChange () {
-    this.setState({voter: VoterStore.voter()});
+    this.setState({voter: VoterStore.getVoter()});
   }
 
   _onOrganizationStoreChange () {
@@ -84,9 +83,6 @@ export default class EditPositionAboutCandidateModal extends Component {
     //   candidate: candidate,
     // });
     //
-    // if (candidate.contest_office_we_vote_id) {
-    //   this.setState({office: OfficeStore.get(candidate.contest_office_we_vote_id) || {}});
-    // }
   }
 
   _onSupportStoreChange () {
@@ -114,7 +110,6 @@ export default class EditPositionAboutCandidateModal extends Component {
     let modal_contents;
     if (position === undefined) {
       // Show a loading wheel while this component's data is loading
-      console.log("position data loading");
       return LoadingWheel;
     // } else if (position.kind_of_ballot_item === "CANDIDATE") {
     //   console.log("this.state.kind_of_owner === CANDIDATE");
@@ -136,7 +131,8 @@ export default class EditPositionAboutCandidateModal extends Component {
                                         organization={this.props.organization}
                                         link_to_edit_modal_off
                                         stance_display_off
-                                        comment_text_off />
+                                        comment_text_off
+                                        placement="bottom"/>
             </ul>
           </div>
           <div className="candidate-card__media-object-content">
@@ -153,8 +149,7 @@ export default class EditPositionAboutCandidateModal extends Component {
     }
     return <Modal {...this.props} bsSize="large" aria-labelledby="contained-modal-title-lg">
       <Modal.Header closeButton>
-        <Modal.Title
-                     id="contained-modal-title-lg"></Modal.Title>
+        <Modal.Title id="contained-modal-title-lg"></Modal.Title>
       </Modal.Header>
       <Modal.Body>
         { modal_contents }

@@ -1,10 +1,11 @@
 import React, { Component, PropTypes } from "react";
 import { Link, browserHistory } from "react-router";
-
+import ImageHandler from "../../components/ImageHandler";
 import StarAction from "../../components/Widgets/StarAction";
 import ItemActionBar from "../../components/Widgets/ItemActionBar";
 import ItemPositionStatementActionBar from "../../components/Widgets/ItemPositionStatementActionBar";
 import ItemSupportOpposeCounts from "../../components/Widgets/ItemSupportOpposeCounts";
+import OfficeNameText from "../../components/Widgets/OfficeNameText";
 import SupportStore from "../../stores/SupportStore";
 import {abbreviateNumber} from "../../utils/textFormat";
 import {numberWithCommas} from "../../utils/textFormat";
@@ -18,7 +19,7 @@ export default class CandidateItem extends Component {
     twitter_description: PropTypes.string,
     twitter_followers_count: PropTypes.number,
     twitter_handle: PropTypes.string,
-    office_name: PropTypes.string,
+    contest_office_name: PropTypes.string,
     link_to_ballot_item_page: PropTypes.bool
   };
 
@@ -54,7 +55,7 @@ export default class CandidateItem extends Component {
       we_vote_id,
       twitter_description,
       twitter_followers_count,
-      office_name,
+      contest_office_name,
       twitter_handle,
     } = this.props;
 
@@ -65,13 +66,13 @@ export default class CandidateItem extends Component {
     let goToCandidateLink = function () { browserHistory.push(candidateLink); };
     let candidate_photo_url_html;
     if (candidate_photo_url) {
-      candidate_photo_url_html = <img className="candidate-card__photo"
-                                          src={candidate_photo_url}
-                                          alt="candidate-photo" />;
+      candidate_photo_url_html = <ImageHandler className="candidate-card__photo"
+                                          imageUrl={candidate_photo_url}
+                                          alt="candidate-photo"
+                                          kind_of_ballot_item="CANDIDATE" />;
     } else {
       candidate_photo_url_html = <i className="icon-lg icon-main icon-icon-person-placeholder-6-1 icon-light utils-img-contain-glyph" />;
     }
-
 
     return <div className="candidate-card">
       <div className="candidate-card__media-object">
@@ -117,15 +118,10 @@ export default class CandidateItem extends Component {
             } onClick={this.props.link_to_ballot_item_page ?
               goToCandidateLink : null }
           >
-            { party ?
-              <span><span className="candidate-card__political-party">
-                {party}
-              </span><span> candidate for </span></span> :
-              "Candidate for "
-            }
-            <span className="candidate-card__office">
-              { office_name }
-            </span>
+          { contest_office_name ?
+          <OfficeNameText political_party={party} contest_office_name={contest_office_name} /> :
+            null
+          }
           </p>
           { twitter_description ?
             <div className={ this.props.link_to_ballot_item_page ? "candidate-card__description-container--truncated" : "candidate-card__description-container"}>

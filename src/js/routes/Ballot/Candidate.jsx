@@ -5,7 +5,7 @@ import CandidateStore from "../../stores/CandidateStore";
 import GuideList from "../../components/VoterGuide/GuideList";
 import GuideStore from "../../stores/GuideStore";
 import GuideActions from "../../actions/GuideActions";
-import OfficeStore from "../../stores/OfficeStore";
+import LoadingWheel from "../../components/LoadingWheel";
 import PositionList from "../../components/Ballot/PositionList";
 import SupportActions from "../../actions/SupportActions";
 import ThisIsMeAction from "../../components/Widgets/ThisIsMeAction";
@@ -19,17 +19,22 @@ export default class Candidate extends Component {
 
   constructor (props) {
     super(props);
-    this.state = {candidate: {}, office: {}, candidate_we_vote_id: this.props.params.candidate_we_vote_id };
+    this.state = {
+      candidate: {},
+      candidate_we_vote_id: this.props.params.candidate_we_vote_id,
+      guideToFollowList: GuideStore.toFollowListForBallotItem()
+
+    };
   }
 
   componentDidMount (){
-    this.candidateStoreListener = CandidateStore.addListener(this._onChange.bind(this));
-    this.officeStoreListener = OfficeStore.addListener(this._onChange.bind(this));
+    this.candidateStoreListener = CandidateStore.addListener(this._onCandidateStoreChange.bind(this));
     var { candidate_we_vote_id } = this.state;
-
     CandidateActions.retrieve(candidate_we_vote_id);
 
-    this.listener = GuideStore.addListener(this._onChange.bind(this));
+
+    // Get the latest guides to follow for this candidate
+    this.guideStoreListener = GuideStore.addListener(this._onGuideStoreChange.bind(this));
     GuideActions.retrieveGuidesToFollowByBallotItem(candidate_we_vote_id, "CANDIDATE");
 
     // Make sure supportProps exist for this Candidate when browser comes straight to candidate page
@@ -57,38 +62,40 @@ export default class Candidate extends Component {
 
   componentWillUnmount () {
     this.candidateStoreListener.remove();
-    this.officeStoreListener.remove();
-    this.listener.remove();
+    this.guideStoreListener.remove();
   }
 
-  _onChange (){
-    var { candidate_we_vote_id } = this.state;
-    var candidate = CandidateStore.get(candidate_we_vote_id) || {};
-    this.setState({ candidate: candidate, guideList: GuideStore.toFollowListForCand() });
+  _onCandidateStoreChange (){
+    let { candidate_we_vote_id } = this.state;
+    let candidate = CandidateStore.get(candidate_we_vote_id) || {};
+    this.setState({ candidate: candidate });
+  }
 
-    if (candidate.contest_office_we_vote_id){
-      this.setState({ office: OfficeStore.get(candidate.contest_office_we_vote_id) || {} });
-    }
-
+  _onGuideStoreChange (){
+    let { candidate_we_vote_id } = this.state;
+    this.setState({ guideToFollowList: GuideStore.toFollowListForBallotItem() });
+    // When the guideToFollowList changes, trigger an update of the candidate so we can get an updated position_list
+    CandidateActions.retrieve(this.state.candidate_we_vote_id);
+    // Also update the position count for *just* this candidate, since it might not come back with positionsCountForAllBallotItems
+    SupportActions.retrievePositionsCountsForOneBallotItem(candidate_we_vote_id);
   }
 
   render () {
     const electionId = VoterStore.election_id();
     const NO_VOTER_GUIDES_TEXT = "We could not find any more voter guides to follow about this candidate or measure.";
-    var { candidate, office, guideList, candidate_we_vote_id } = this.state;
+    var { candidate, guideToFollowList, candidate_we_vote_id } = this.state;
 
     if (!candidate.ballot_item_display_name){
-      return <div className="container-fluid well u-gutter-top--small fluff-full1">
-              <h3>No Candidate Found</h3>
-                <div className="small">We were not able to find that candidate.
-                  Please search again.</div>
+      // TODO DALE If the candidate we_vote_id is not valid, we need to update this with a notice
+      return <div className="container-fluid well u-gutter__top--small fluff-full1">
+                <div>{LoadingWheel}</div>
                 <br />
             </div>;
     }
 
     return <span>
         <section className="candidate-card__container">
-          <CandidateItem {...candidate} office_name={office.ballot_item_display_name}/>
+          <CandidateItem {...candidate} contest_office_name={candidate.contest_office_name} />
           <div className="candidate-card__additional">
             { candidate.position_list ?
               <div>
@@ -97,10 +104,10 @@ export default class Candidate extends Component {
               </div> :
               null
             }
-            {guideList.length === 0 ?
+            {guideToFollowList.length === 0 ?
               <p className="candidate-card__no-additional">{NO_VOTER_GUIDES_TEXT}</p> :
               <div><h3 className="candidate-card__additional-heading">{"More opinions about " + candidate.ballot_item_display_name}</h3>
-              <GuideList id={electionId} ballotItemWeVoteId={candidate_we_vote_id} organizations={guideList}/></div>
+              <GuideList id={electionId} ballotItemWeVoteId={candidate_we_vote_id} organizationsToFollow={guideToFollowList}/></div>
             }
           </div>
         </section>
